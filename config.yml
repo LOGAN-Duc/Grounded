@@ -1,0 +1,11 @@
+production: false
+service:
+  name: my_grounded
+  port: 9999
+
+mysqldb:
+  mysql_host: mysql
+  mysql_port: 3306
+  mysql_user: my_grounded
+  mysql_password: my_grounded
+  mysql_database: my_grounded

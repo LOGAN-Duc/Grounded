@@ -1,0 +1,5 @@
+development:
+  dialect: mysql
+  datasource: my_grounded:my_grounded@tcp(localhost:3307)/my_grounded?charset=utf8&parseTime=True&loc=Local
+  dir: migrations
+  table: migrations
