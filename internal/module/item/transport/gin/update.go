@@ -1,13 +1,14 @@
 package itemgin
 
 import (
-	"fmt"
 	"strconv"
 
 	"example.com/m/internal/component"
 	itembiz "example.com/m/internal/module/item/biz"
 	itemmodel "example.com/m/internal/module/item/model"
 	itemstore "example.com/m/internal/module/item/store"
+	itemresourcestore "example.com/m/internal/module/item_resource/store"
+	resourcestore "example.com/m/internal/module/resource/store"
 	"github.com/gin-gonic/gin"
 )
 
@@ -23,12 +24,13 @@ func update(appCtx component.AppContext) gin.HandlerFunc {
 		if err := ctx.ShouldBindJSON(&data); err != nil {
 			panic(err)
 		}
-		fmt.Println(data.Name)
 		mysql := appCtx.GetMySqlDB()
+		store := itemresourcestore.NewItemResourceStore(mysql)
+		resourceStore := resourcestore.NewResourcesStore(mysql)
 		Store := itemstore.NewItemStore(mysql)
-		biz := itembiz.NewUpdateResourceBiz(Store)
+		biz := itembiz.NewUpdateResourceBiz(Store, store, resourceStore)
 
-		err = biz.UpadteWithInterFace(ctx.Request.Context(), id, data)
+		err = biz.UpdateWithInterface(ctx.Request.Context(), id, data)
 		if err != nil {
 			ctx.JSON(500, gin.H{"error": err.Error()})
 			return

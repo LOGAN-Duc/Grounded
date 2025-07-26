@@ -6,6 +6,7 @@ toolchain go1.23.11
 
 require (
 	github.com/btcsuite/btcutil v1.0.2
+	github.com/gin-contrib/cors v1.7.6
 	github.com/gin-gonic/gin v1.10.1
 	github.com/go-playground/validator/v10 v10.26.0
 	github.com/sirupsen/logrus v1.9.3

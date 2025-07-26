@@ -28,11 +28,11 @@ CREATE TABLE resources_type (
 );
 
 CREATE TABLE item_resources (
+    id INT AUTO_INCREMENT PRIMARY KEY,
     item_id INT,
     resource_id INT,
     quantity INT,
-    status varchar(2) DEFAULT 1,  -- Thêm cột status
-    PRIMARY KEY (item_id, resource_id)  
+    status varchar(2) DEFAULT 1 -- Thêm cột status
 );
 
 ALTER TABLE items

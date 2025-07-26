@@ -15,9 +15,11 @@ import (
 	"example.com/m/internal/component"
 	cpnmysqldb "example.com/m/internal/component/mysqldb"
 	itemgin "example.com/m/internal/module/item/transport/gin"
+	itemresourcegin "example.com/m/internal/module/item_resource/transport/gin"
 	itemtypegin "example.com/m/internal/module/item_type/transport/gin"
 	resourcegin "example.com/m/internal/module/resource/transport/gin"
 	resourcetypegin "example.com/m/internal/module/resource_type/transport/gin"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -32,8 +34,15 @@ func main() {
 		log.Fatalf("Failed to connect to MySQL: %v", err)
 	}
 	gin.SetMode(gin.ReleaseMode)
-
-	r := gin.Default()
+	r := gin.Default() // dùng Default sẽ có sẵn Logger + Recovery
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:5175"}, // hoặc "*" để mở cho tất cả
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
 	r.GET("/healthz", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "pong",
@@ -42,6 +51,7 @@ func main() {
 
 	appCtx := component.NewAppContext(config, mysqlDB)
 	//module
+	itemresourcemodule := itemresourcegin.NewItemResourceModule(appCtx)
 	resourcemodule := resourcegin.NewResourceModule(appCtx)
 	resourcetypemodule := resourcetypegin.NewResourceTypeModule(appCtx)
 	itemtypemodule := itemtypegin.NewItemTypeModule(appCtx)
@@ -51,6 +61,7 @@ func main() {
 		resourcetypemodule,
 		itemtypemodule,
 		itemmodule,
+		itemresourcemodule,
 	}
 	for _, module := range modules {
 		module.SetupGin(r)
