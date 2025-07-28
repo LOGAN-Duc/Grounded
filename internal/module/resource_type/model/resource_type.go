@@ -11,6 +11,6 @@ func (ResourceType) TableName() string {
 	return "resources_type"
 }
 
-func (s *ResourceType) Mark() {
-	s.GenUID(common.DBTypeResourceType)
-}
+// func (s *ResourceType) Mark() {
+// 	s.GenUID(common.DBTypeResourceType)
+// }

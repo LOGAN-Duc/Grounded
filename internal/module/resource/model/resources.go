@@ -13,6 +13,7 @@ type Resources struct {
 func (Resources) TableName() string {
 	return "resources"
 }
-func (r *Resources) Mark() {
-	r.MySqlModel.GenUID(common.DBTypeResource)
-}
+
+// func (r *Resources) Mark() {
+// 	r.MySqlModel.GenUID(common.DBTypeResource)
+// }
