@@ -3,10 +3,12 @@ package itemresourcebiz
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	itemmodel "example.com/m/internal/module/item/model"
 	itemresourcemodel "example.com/m/internal/module/item_resource/model"
 	resourcemodel "example.com/m/internal/module/resource/model"
+	"gorm.io/gorm"
 )
 
 type CreateItemRrsourceStore interface {
@@ -34,50 +36,52 @@ func NewCreateItemResourceBiz(store CreateItemRrsourceStore, resourceStore FindR
 		itemStore:     itemStore,
 	}
 }
+func (biz *createItemResourceBiz) Create(ctx context.Context, id int, req []itemresourcemodel.CreateItemRrsourceRequest) error {
+	for _, itemReq := range req {
+		// Kiểm tra xem item-resource đã tồn tại chưa
+		// Tìm resource theo ID
+		resource, err := biz.resourceStore.FindByID(ctx, itemReq.ResourceId)
+		if err != nil {
+			return errors.New("resource does not exist")
+		}
+		// Tìm item theo ID
+		item, err := biz.itemStore.FindByID(ctx, id)
+		if err != nil {
+			return errors.New("item does not exist")
+		}
 
-func (biz *createItemResourceBiz) Create(ctx context.Context, req itemresourcemodel.CreateItemRrsourceRequest) error {
-	// Kiểm tra xem item-resource đã tồn tại chưa
-	_, err := biz.store.FindByItemIdAndResourceId(ctx, req.ItemId, req.ResourceId)
-	if err == nil {
-		// Kiểm tra lỗi nếu không tìm thấy item-resource
-		return errors.New("item-resource does not exist")
-	}
+		_, err = biz.store.FindByItemIdAndResourceId(ctx, id, itemReq.ResourceId)
+		if err == nil {
+			return fmt.Errorf("resource %s already exists in %s", resource.Name, item.Name)
+		} else if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return err
+		}
 
-	// Tìm resource theo ID
-	resource, err := biz.resourceStore.FindByID(ctx, req.ResourceId)
-	if err != nil {
-		return errors.New("resource does not exist")
-	}
+		// Cập nhật code cho item
+		for i := 0; i < itemReq.Quantity; i++ {
+			item.Code += resource.Code
+		}
 
-	// Tìm item theo ID
-	item, err := biz.itemStore.FindByID(ctx, req.ItemId)
-	if err != nil {
-		return errors.New("item does not exist")
-	}
+		// Cập nhật item
+		updates := map[string]interface{}{
+			"code": item.Code,
+		}
+		err = biz.itemStore.UpadteWithInterFace(ctx, id, updates)
+		if err != nil {
+			return errors.New("failed to update item")
+		}
 
-	// Cập nhật code cho item
-	for i := 0; i < req.Quantity; i++ {
-		item.Code += resource.Code
-	}
-	
-	// Tạo bản đồ cập nhật
-	updates := map[string]interface{}{
-		"code": item.Code,
-	}
+		// Tạo mới bản ghi item-resource
+		data := &itemresourcemodel.ItemResource{
+			ItemId:     id,
+			ResourceId: itemReq.ResourceId,
+			Quantity:   itemReq.Quantity,
+		}
 
-	// Cập nhật item trong cơ sở dữ liệu
-	err = biz.itemStore.UpadteWithInterFace(ctx, req.ItemId, updates)
-	if err != nil {
-		return errors.New("failed to update item")
+		// Lưu item-resource vào cơ sở dữ liệu
+		if err := biz.store.Create(ctx, data); err != nil {
+			return err
+		}
 	}
-
-	// Tạo mới một bản ghi item-resource
-	data := &itemresourcemodel.ItemResource{
-		ItemId:     req.ItemId,
-		ResourceId: req.ResourceId,
-		Quantity:   req.Quantity,
-	}
-
-	// Lưu item-resource vào cơ sở dữ liệu
-	return biz.store.Create(ctx, data)
+	return nil
 }

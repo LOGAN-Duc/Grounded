@@ -20,7 +20,7 @@ func list(appCtx component.AppContext) gin.HandlerFunc {
 			panic(err)
 		}
 		paging = paging.Fulfill()
-		moreKeys := []string{}
+		moreKeys := []string{"ItemType"}
 		mysqlDB := appCtx.GetMySqlDB()
 		Store := itemstore.NewItemStore(mysqlDB)
 		biz := itembiz.NewListItemBiz(Store)

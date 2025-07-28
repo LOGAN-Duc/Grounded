@@ -34,3 +34,22 @@ func (s *resourceStore) List(ctx context.Context, paging common.Paging,
 	}
 	return resources, total, nil
 }
+func (s *resourceStore) ListNoItemResource(ctx context.Context, filter *resourcemodel.ListResourcesRequest) ([]resourcemodel.Resources, error) {
+	var resources []resourcemodel.Resources
+
+	query := s.mysql.WithContext(ctx).Table("resources").
+		Joins("LEFT JOIN item_resources ON item_resources.resource_id = resources.id").
+		Where("resources.status = ?", "1").
+		Where("resources.id NOT IN (SELECT resource_id FROM item_resources)")
+
+	if filter.Search != "" {
+		query = query.Where("name LIKE ?", "%"+filter.Search+"%")
+	}
+
+	// Lấy danh sách resource
+	if err := query.Find(&resources).Error; err != nil {
+		return nil, err
+	}
+
+	return resources, nil
+}

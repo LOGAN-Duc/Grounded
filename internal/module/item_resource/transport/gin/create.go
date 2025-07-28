@@ -1,6 +1,8 @@
 package itemresourcetransport
 
 import (
+	"strconv"
+
 	"example.com/m/internal/component"
 	itemstore "example.com/m/internal/module/item/store"
 	itemresourcebiz "example.com/m/internal/module/item_resource/biz"
@@ -12,17 +14,23 @@ import (
 
 func create(appCtx component.AppContext) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
+		idStr := ctx.Param("id")
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			ctx.JSON(400, gin.H{"error": "Invalid id"})
+			return
+		}
 		mysql := appCtx.GetMySqlDB()
 		store := itemresourcestore.NewItemResourceStore(mysql)
 		itemstore := itemstore.NewItemStore(mysql)
 		resourceStore := resourcestore.NewResourcesStore(mysql)
 		biz := itemresourcebiz.NewCreateItemResourceBiz(store, resourceStore, itemstore)
 
-		var data itemresourcemodel.CreateItemRrsourceRequest
+		var data []itemresourcemodel.CreateItemRrsourceRequest
 		if err := ctx.ShouldBindJSON(&data); err != nil {
 			panic(err)
 		}
-		if err := biz.Create(ctx.Request.Context(), data); err != nil {
+		if err := biz.Create(ctx.Request.Context(), id, data); err != nil {
 			ctx.JSON(400, gin.H{"error": err.Error()})
 			return
 		}

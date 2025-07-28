@@ -8,6 +8,7 @@ import (
 )
 
 type CreateResourceTypeStore interface {
+	FindByName(ctx context.Context, id string) (*resourcetypemodel.ResourceType, error)
 	Create(ctx context.Context, req *resourcetypemodel.ResourceType) error
 }
 
@@ -24,6 +25,10 @@ func NewCreateResourceTypeBiz(store CreateResourceTypeStore) *createResourceType
 func (biz *createResourceTypeBiz) Create(ctx context.Context, req *resourcetypemodel.CreateResourceTypeRequest) error {
 	if req.Name == "" {
 		return errors.New("please! input name type of resource")
+	}
+	_, err := biz.store.FindByName(ctx, req.Name)
+	if err == nil {
+		return errors.New("name already exists")
 	}
 	reasourceType := &resourcetypemodel.ResourceType{
 		Name: req.Name,

@@ -44,39 +44,38 @@ func main() {
 		MaxAge:           12 * time.Hour,
 	}))
 
+	// Health check endpoint
 	r.GET("/healthz", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "pong",
-		})
+		c.JSON(http.StatusOK, gin.H{"message": "pong"})
 	})
 
 	appCtx := component.NewAppContext(config, mysqlDB)
-	//module
-	itemresourcemodule := itemresourcegin.NewItemResourceModule(appCtx)
-	resourcemodule := resourcegin.NewResourceModule(appCtx)
-	resourcetypemodule := resourcetypegin.NewResourceTypeModule(appCtx)
-	itemtypemodule := itemtypegin.NewItemTypeModule(appCtx)
-	itemmodule := itemgin.NewItemModule(appCtx)
+
+	// Setup modules
 	modules := []common.AppModule{
-		resourcemodule,
-		resourcetypemodule,
-		itemtypemodule,
-		itemmodule,
-		itemresourcemodule,
+		itemresourcegin.NewItemResourceModule(appCtx),
+		resourcegin.NewResourceModule(appCtx),
+		resourcetypegin.NewResourceTypeModule(appCtx),
+		itemtypegin.NewItemTypeModule(appCtx),
+		itemgin.NewItemModule(appCtx),
 	}
+
 	for _, module := range modules {
 		module.SetupGin(r)
 	}
+
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%d", config.Service.Port),
 		Handler: r,
 	}
+
 	go func() {
 		log.Printf("Starting server on %s\n", srv.Addr)
 		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.Fatalf("ListenAndServe failed: %v", err)
 		}
 	}()
+
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit

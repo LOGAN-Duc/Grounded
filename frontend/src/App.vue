@@ -1,24 +1,12 @@
+<!-- src/App.vue -->
 <template>
   <div id="app">
-    <ItemList />
+    <router-view />
   </div>
 </template>
 
 <script>
-import ItemList from './components/ItemList.vue'
-
 export default {
-  name: 'App',
-  components: {
-    ItemList
-  }
+  name: 'App'
 }
 </script>
-
-<style>
-body {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  margin: 0;
-  padding: 0;
-}
-</style>

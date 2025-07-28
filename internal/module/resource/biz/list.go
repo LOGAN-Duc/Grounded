@@ -10,6 +10,7 @@ import (
 type ListResourcesStore interface {
 	List(ctx context.Context, paging common.Paging,
 		filter *resourcemodel.ListResourcesRequest, moreKeys []string) ([]resourcemodel.Resources, int64, error)
+	ListNoItemResource(ctx context.Context, filter *resourcemodel.ListResourcesRequest) ([]resourcemodel.Resources, error)
 }
 type listResourcesBiz struct {
 	store ListResourcesStore
@@ -27,4 +28,12 @@ func (biz *listResourcesBiz) List(ctx context.Context, paging common.Paging,
 		return nil, 0, err
 	}
 	return resources, total, nil
+}
+
+func (biz *listResourcesBiz) ListNoItemResource(ctx context.Context, filter *resourcemodel.ListResourcesRequest) ([]resourcemodel.Resources, error) {
+	resources, err := biz.store.ListNoItemResource(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+	return resources, nil
 }
