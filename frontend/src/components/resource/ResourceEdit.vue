@@ -1,6 +1,6 @@
 <template>
   <div class="container mt-4">
-    <h2>Chỉnh sửa Resource</h2>
+    <h2>Chỉnh sửa Resource {{ resource.id }}</h2>
     <form @submit.prevent="updateResource">
       <div class="mb-3">
         <label for="name" class="form-label">Name</label>
@@ -8,7 +8,7 @@
           type="text"
           class="form-control"
           v-model="resource.name"
-          required
+          
         />
       </div>
       <div class="mb-3">
@@ -17,8 +17,17 @@
           type="text"
           class="form-control"
           v-model="resource.code"
-          required
+          
         />
+      </div>
+      <div class="mb-3">
+        <label for="resourceTypeId" class="form-label">Loại Resource</label>
+        <select v-model="resource.resourceTypeId" class="form-select" >
+          <option value="" disabled>Chọn loại resource</option>
+          <option v-for="type in resourceTypes" :key="type.id" :value="type.id">
+            {{ type.name }}
+          </option>
+        </select>
       </div>
       <button type="submit" class="btn btn-primary">Cập nhật</button>
     </form>
@@ -36,11 +45,15 @@ export default {
       resource: {
         name: '',
         code: '',
+        id: this.$route.params.id,
+        resourceTypeId: null, // Thêm thuộc tính resourceTypeId
       },
+      resourceTypes: [], // Khởi tạo biến resourceTypes
     };
   },
   created() {
     this.fetchResource();
+    this.fetchResourceTypes(); // Thêm dấu ngoặc
   },
   methods: {
     fetchResource() {
@@ -51,6 +64,16 @@ export default {
         })
         .catch((err) => {
           console.error('Lỗi khi lấy resource:', err);
+        });
+    },
+    fetchResourceTypes() {
+      axios
+        .get('http://localhost:9999/resources-type/')
+        .then((res) => {
+          this.resourceTypes = res.data.result || res.data;
+        })
+        .catch((err) => {
+          console.error('Lỗi khi lấy dữ liệu:', err);
         });
     },
     updateResource() {

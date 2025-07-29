@@ -2,6 +2,7 @@ package itemresourcebiz
 
 import (
 	"context"
+	"errors"
 
 	itemresourcemodel "example.com/m/internal/module/item_resource/model"
 )
@@ -21,10 +22,25 @@ func NewUpdateItemResourceBiz(store UpdateItemResourceRequest) *updateItemResour
 	}
 }
 
-// func (biz *updateItemResourceBiz) Update(ctx context.Context, id int, idR int, req []itemresourcemodel.UpdateItemRrsourceRequest) error {
-// 	datas, err := biz.store.FindByItemIdAndResourceId(ctx, id, idR)
-// 	if err != nil {
-// 		return errors.New("item dosen't exist")
-// 	}
+func (biz *updateItemResourceBiz) Update(ctx context.Context, idR int, req []itemresourcemodel.UpdateItemRrsourceRequest) error {
+	for _, resourceReq := range req {
+		itemResource, err := biz.store.FindByItemIdAndResourceId(ctx, idR, resourceReq.ResourceId)
+		if err != nil {
+			return errors.New("reource not found")
+		}
 
-// }
+		updates := map[string]interface{}{}
+		if *resourceReq.Quantity != itemResource.Quantity {
+			updates["quantity"] = resourceReq.Quantity
+		}
+
+		// Nếu không có gì để cập nhật, bỏ qua
+		if len(updates) > 0 {
+			// Lưu thay đổi vào store
+			if err := biz.store.Update(ctx, int(itemResource.Id), updates); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}

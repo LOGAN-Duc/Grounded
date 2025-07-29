@@ -25,6 +25,6 @@ func (m *resourceModule) SetupGin(r *gin.Engine) {
 func (m *resourceModule) registerRoutes(r *gin.RouterGroup) {
 	r.POST("/", create(m.appCtx))
 	r.GET("/", list(m.appCtx))
-	r.GET("/no_item", listNoItemResource(m.appCtx))
+	r.GET("/no_item/:id", listNoItemResource(m.appCtx))
 	r.PUT("/:id", update(m.appCtx))
 }

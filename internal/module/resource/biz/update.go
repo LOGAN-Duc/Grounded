@@ -39,7 +39,7 @@ func (biz *updateResourceStore) UpadteWithInterFace(ctx context.Context, id int,
 		updates["resource_type_id"] = *req.ResourceTypeId
 	}
 	if len(updates) == 0 {
-		return errors.New("no data to update")
+		return nil
 	}
 	err = biz.store.UpadteWithInterFace(ctx, int(resource.Id), updates)
 	if err != nil {

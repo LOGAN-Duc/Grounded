@@ -1,6 +1,8 @@
 package resourcetransport
 
 import (
+	"strconv"
+
 	"example.com/m/internal/common"
 	"example.com/m/internal/component"
 	resourcebiz "example.com/m/internal/module/resource/biz"
@@ -37,6 +39,12 @@ func list(appCtx component.AppContext) gin.HandlerFunc {
 
 func listNoItemResource(appCtx component.AppContext) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
+		idStr := ctx.Param("id")
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			ctx.JSON(400, gin.H{"error": "Invalid id"})
+			return
+		}
 		var filter resourcemodel.ListResourcesRequest
 		if err := ctx.ShouldBindQuery(&filter); err != nil {
 			panic(err)
@@ -45,7 +53,7 @@ func listNoItemResource(appCtx component.AppContext) gin.HandlerFunc {
 		store := resourcestore.NewResourcesStore(mysqlDB)
 		biz := resourcebiz.NewListResourcesBiz(store)
 
-		resources, err := biz.ListNoItemResource(ctx.Request.Context(), &filter)
+		resources, err := biz.ListNoItemResource(ctx.Request.Context(), id, &filter)
 		if err != nil {
 			ctx.JSON(500, gin.H{"error": err.Error()})
 			return

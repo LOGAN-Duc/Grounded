@@ -8,7 +8,7 @@
       </div>
       <div class="mb-3">
         <label for="code" class="form-label">Mã</label>
-        <input type="text" v-model="form.code" class="form-control" id="code" required />
+        <input type="text" v-model="form.code" class="form-control" id="code"  />
       </div>
       <div class="mb-3">
         <label for="resourceTypeId" class="form-label">Loại Resource</label>

@@ -24,7 +24,9 @@ func (m *itemresourceModule) SetupGin(r *gin.Engine) {
 }
 func (m *itemresourceModule) registerRoutes(r *gin.RouterGroup) {
 	r.POST("/:id", create(m.appCtx))
-	// r.GET("/", list(m.appCtx))
+	r.GET("/", list(m.appCtx))
+	r.GET("/:id", list(m.appCtx))
 	// r.PUT("/:id", update(m.appCtx))
-	r.DELETE("/:id", delete(m.appCtx))
+	r.PUT("/status", delete(m.appCtx))
+	r.PUT("/:id", update(m.appCtx))
 }

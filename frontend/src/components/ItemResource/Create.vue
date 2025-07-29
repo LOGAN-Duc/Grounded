@@ -100,7 +100,7 @@ export default {
   methods: {
     fetchResources() {
       axios
-        .get('http://localhost:9999/resources/no_item')
+        .get(`http://localhost:9999/resources/no_item/${this.item.id}`)
         .then(res => {
           this.resources = res.data.result || res.data;
         })

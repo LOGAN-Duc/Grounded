@@ -53,7 +53,7 @@ func (biz *updateItemStore) UpdateWithInterface(ctx context.Context, id int, req
 			if err != nil {
 				return fmt.Errorf("resource not found for id %d: %w", itemResource.ResourceId, err)
 			}
-			if resource.Status == "1" {
+			if resource.Status == "1" && itemResource.Quantity > 0 {
 				for i := 0; i < itemResource.Quantity; i++ {
 					builder.WriteString(resource.Code)
 				}
@@ -77,7 +77,7 @@ func (biz *updateItemStore) UpdateWithInterface(ctx context.Context, id int, req
 	}
 
 	if len(updates) == 0 {
-		return errors.New("no data to update")
+		return nil
 	}
 
 	err = biz.store.UpadteWithInterFace(ctx, id, updates)
