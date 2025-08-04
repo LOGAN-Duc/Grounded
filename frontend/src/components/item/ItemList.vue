@@ -13,6 +13,11 @@
       </div>
     </div>
 
+    <div class="mt-3">
+      <button class="btn btn-primary" @click="goToCreate">+ Tạo Item</button>
+    </div>
+
+    <br />
     <div v-if="loading" class="text-center">Đang tải dữ liệu...</div>
 
     <table class="table table-bordered align-middle" v-else>
@@ -25,21 +30,27 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="item in paginatedItems" :key="item.id">
-          <td style="white-space: nowrap; width: 200px;">{{ item.name }}</td>
+        <tr
+          v-for="item in paginatedItems"
+          :key="item.id"
+          @click="selectItem(item)"
+          :class="{ 'table-active': selectedItem && selectedItem.id === item.id }"
+          style="cursor: pointer;"
+        >
+          <td>{{ item.name }}</td>
           <td>{{ item.item_Type?.name || 'Không xác định' }}</td>
           <td class="text-truncate position-relative" style="width: 200px;">
             <div class="d-flex justify-content-between align-items-center">
               <span class="text-truncate" style="width: 200px;" :title="item.code">
                 {{ item.code }}
               </span>
-              <button class="btn btn-sm btn-outline-secondary" @click="copyToClipboard(item.code)">Copy</button>
+              <button class="btn btn-sm btn-outline-secondary" @click.stop="copyToClipboard(item.code)">Copy</button>
             </div>
           </td>
           <td>
-            <button class="btn btn-sm btn-warning btn-custom" @click="updateItem(item.id)">Cập nhật</button>
-            <button class="btn btn-sm btn-info btn-custom" @click="edit(item.id)">Chỉnh sửa</button>
-            <button class="btn btn-sm btn-success btn-custom" @click="addResource(item.id)">Thêm Resource</button>
+            <button class="btn btn-sm btn-warning btn-custom" @click.stop="updateItem(item.id)">Cập nhật</button>
+            <button class="btn btn-sm btn-info btn-custom" @click.stop="edit(item.id)">Chỉnh sửa</button>
+            <button class="btn btn-sm btn-success btn-custom" @click.stop="addResource(item.id)">Thêm Resource</button>
           </td>
         </tr>
         <tr v-if="paginatedItems.length === 0">
@@ -54,8 +65,24 @@
       <button class="btn btn-secondary" @click="nextPage" :disabled="currentPage === totalPages">Sau</button>
     </div>
 
-    <div class="mt-3">
-      <button class="btn btn-primary" @click="goToCreate">+ Tạo Item</button>
+    <!-- Hiển thị code nhân lên số lượng -->
+    <div v-if="selectedItem" class="mt-4">
+      <h5>Đã chọn: {{ selectedItem.name }}</h5>
+      <div class="mb-2">
+        <label for="number">Số lượng:</label>
+        <input
+          type="number"
+          min="1"
+          v-model.number="selectedNumber"
+          class="form-control d-inline-block w-auto ms-2"
+        />
+      </div>
+
+      <div v-if="generatedCodes.length > 0">
+        <label>Danh sách mã ({{ generatedCodes.length }}):</label>
+        <textarea class="form-control" rows="5" readonly :value="generatedCodes.join('\n')"></textarea>
+        <button class="btn btn-outline-secondary mt-2" @click="copyCodes">Copy tất cả</button>
+      </div>
     </div>
   </div>
 </template>
@@ -77,6 +104,8 @@ export default {
       currentPage: 1,
       itemsPerPage: 10,
       totalItems: 0,
+      selectedItem: null,
+      selectedNumber: 1,
     };
   },
   computed: {
@@ -93,6 +122,10 @@ export default {
     totalPages() {
       return Math.ceil(this.totalItems / this.itemsPerPage);
     },
+    generatedCodes() {
+      if (!this.selectedItem || this.selectedNumber < 1) return [];
+      return Array.from({ length: this.selectedNumber }, () => this.selectedItem.code);
+    },
   },
   methods: {
     async fetchItems() {
@@ -105,7 +138,7 @@ export default {
         };
         const res = await axios.get('http://localhost:9999/items/', { params });
         this.items = res.data.result || [];
-        this.totalItems = res.data.pagingData.total || 0;// Giả sử API trả về tổng số items
+        this.totalItems = res.data.pagingData.total || 0;
       } catch (err) {
         console.error('Lỗi khi lấy dữ liệu:', err);
       } finally {
@@ -115,6 +148,12 @@ export default {
     copyToClipboard(text) {
       navigator.clipboard.writeText(text).then(() => {
         alert('Đã sao chép!');
+      });
+    },
+    copyCodes() {
+      const text = this.generatedCodes.join('\n');
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Đã copy toàn bộ!');
       });
     },
     edit(id) {
@@ -132,14 +171,14 @@ export default {
 
       const updateData = {
         name: item.name,
-        code: item.code, // Đặt lại code là chuỗi rỗng như yêu cầu
+        code: item.code,
       };
 
       axios
         .put(`http://localhost:9999/items/${id}`, updateData)
         .then(() => {
           alert('Cập nhật thành công!');
-          this.fetchItems(); // Reload danh sách nếu cần
+          this.fetchItems();
         })
         .catch(err => {
           console.error('Lỗi khi cập nhật:', err.response?.data || err.message);
@@ -152,19 +191,23 @@ export default {
     nextPage() {
       if (this.currentPage < this.totalPages) {
         this.currentPage++;
-        this.fetchItems(); // Tải lại dữ liệu khi chuyển trang
+        this.fetchItems();
       }
     },
     prevPage() {
       if (this.currentPage > 1) {
         this.currentPage--;
-        this.fetchItems(); // Tải lại dữ liệu khi chuyển trang
+        this.fetchItems();
       }
+    },
+    selectItem(item) {
+      this.selectedItem = item;
+      this.selectedNumber = 1;
     },
   },
   watch: {
     search() {
-      this.currentPage = 1; // Reset lại trang về 1 khi tìm kiếm
+      this.currentPage = 1;
       this.fetchItems();
     },
   },
@@ -185,5 +228,9 @@ export default {
 
 .btn-custom:hover {
   filter: brightness(90%);
+}
+
+.table-active {
+  background-color: #e6f7ff !important;
 }
 </style>
