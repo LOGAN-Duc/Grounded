@@ -10,7 +10,10 @@ type Item struct {
 	Name       string                  `json:"name" gorm:"column:name;not null"`
 	Code       string                  `json:"code,omitempty" gorm:"column:code"`
 	ItemTypeId int                     `json:"-" gorm:"column:item_type_id"`
-	ItemType   *itemtypemodel.ItemType `json:"item_Type"`
+	ItemType   *itemtypemodel.ItemType `json:"item_type" gorm:"foreignKey:ItemTypeId"`
+
+	Url     string `json:"url" gorm:"column:url"`
+	BiomeId *int   `json:"biomeId" gorm:"column:biome_id"`
 }
 
 func (Item) TableName() string {

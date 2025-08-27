@@ -25,13 +25,15 @@ type updateItemStore struct {
 	store             UpdateItemStore
 	itemResourceStore FindByItemIdAndResourceIdStore
 	resource          FindResourceStore
+	boimeStore        FindBoimeStore
 }
 
-func NewUpdateResourceBiz(store UpdateItemStore, itemResourceStore FindByItemIdAndResourceIdStore, resource FindResourceStore) *updateItemStore {
+func NewUpdateResourceBiz(store UpdateItemStore, itemResourceStore FindByItemIdAndResourceIdStore, resource FindResourceStore, boimeStore FindBoimeStore) *updateItemStore {
 	return &updateItemStore{
 		store:             store,
 		itemResourceStore: itemResourceStore,
 		resource:          resource,
+		boimeStore:        boimeStore,
 	}
 }
 func (biz *updateItemStore) UpdateWithInterface(ctx context.Context, id int, req itemmodel.UpdateItemRequest) error {
@@ -40,7 +42,13 @@ func (biz *updateItemStore) UpdateWithInterface(ctx context.Context, id int, req
 	if err != nil {
 		return errors.New("item not found")
 	}
-
+	if req.BoimeId != nil && req.BoimeId != item.BiomeId {
+		_, err = biz.itemResourceStore.FindByItemId(ctx, *req.BoimeId)
+		if err != nil {
+			return errors.New("boime dosen't exists")
+		}
+		updates["biome_id"] = req.BoimeId
+	}
 	listItemResources, err := biz.itemResourceStore.FindByItemId(ctx, id)
 	if err != nil {
 		return errors.New("item-resources not found")

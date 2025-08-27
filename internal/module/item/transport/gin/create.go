@@ -2,6 +2,7 @@ package itemgin
 
 import (
 	"example.com/m/internal/component"
+	boimesstore "example.com/m/internal/module/boimes/store"
 	itembiz "example.com/m/internal/module/item/biz"
 	itemmodel "example.com/m/internal/module/item/model"
 	itemstore "example.com/m/internal/module/item/store"
@@ -17,7 +18,8 @@ func create(appCtx component.AppContext) gin.HandlerFunc {
 		}
 		mysqlDB := appCtx.GetMySqlDB()
 		Store := itemstore.NewItemStore(mysqlDB)
-		Biz := itembiz.NewCreateItemBiz(Store)
+		boimeStore := boimesstore.NewBoimesStore(mysqlDB)
+		Biz := itembiz.NewCreateItemBiz(Store, boimeStore)
 		if err := Biz.Create(c.Request.Context(), &item); err != nil {
 			c.JSON(400, gin.H{"error": err.Error()})
 			return

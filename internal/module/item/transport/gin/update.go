@@ -4,6 +4,7 @@ import (
 	"strconv"
 
 	"example.com/m/internal/component"
+	boimesstore "example.com/m/internal/module/boimes/store"
 	itembiz "example.com/m/internal/module/item/biz"
 	itemmodel "example.com/m/internal/module/item/model"
 	itemstore "example.com/m/internal/module/item/store"
@@ -28,7 +29,8 @@ func update(appCtx component.AppContext) gin.HandlerFunc {
 		store := itemresourcestore.NewItemResourceStore(mysql)
 		resourceStore := resourcestore.NewResourcesStore(mysql)
 		Store := itemstore.NewItemStore(mysql)
-		biz := itembiz.NewUpdateResourceBiz(Store, store, resourceStore)
+		boimeStore := boimesstore.NewBoimesStore(mysql)
+		biz := itembiz.NewUpdateResourceBiz(Store, store, resourceStore, boimeStore)
 
 		err = biz.UpdateWithInterface(ctx.Request.Context(), id, data)
 		if err != nil {

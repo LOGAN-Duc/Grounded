@@ -10,13 +10,11 @@ type Resources struct {
 	Name           string                          `json:"name" gorm:"column:name"`
 	Code           string                          `json:"code" gorm:"column:code"`
 	ResourceTypeId int                             `json:"-" gorm:"column:resource_type_id"`
-	ResourceType   *resourcetypemodel.ResourceType `json:"resourceType"`
+	ResourceType   *resourcetypemodel.ResourceType `json:"resource_type" gorm:"foreignKey:ResourceTypeId"`
+
+	Url string `json:"url" gorm:"column:url"`
 }
 
 func (Resources) TableName() string {
 	return "resources"
 }
-
-// func (r *Resources) Mark() {
-// 	r.MySqlModel.GenUID(common.DBTypeResource)
-// }

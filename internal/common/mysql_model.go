@@ -1,7 +1,7 @@
 package common
 
 type MySqlModel struct {
-	Id uint `json:"id" gorm:"column:id"`
+	Id int `json:"id" gorm:"column:id"`
 	// FakeId *UID   `json:"id" gorm:"-"`
 	Status string `json:"status,omitempty" gorm:"column:status;default:1"`
 }

@@ -14,6 +14,7 @@ import (
 	"example.com/m/internal/common"
 	"example.com/m/internal/component"
 	cpnmysqldb "example.com/m/internal/component/mysqldb"
+	boimegin "example.com/m/internal/module/boimes/transport/gin"
 	itemgin "example.com/m/internal/module/item/transport/gin"
 	itemresourcegin "example.com/m/internal/module/item_resource/transport/gin"
 	itemtypegin "example.com/m/internal/module/item_type/transport/gin"
@@ -53,6 +54,7 @@ func main() {
 
 	// Setup modules
 	modules := []common.AppModule{
+		boimegin.NewBoimeModule(appCtx),
 		itemresourcegin.NewItemResourceModule(appCtx),
 		resourcegin.NewResourceModule(appCtx),
 		resourcetypegin.NewResourceTypeModule(appCtx),
