@@ -21,7 +21,7 @@ func update(appCtx component.AppContext) gin.HandlerFunc {
 			return
 		}
 		var data itemmodel.UpdateItemRequest
-		if err := ctx.ShouldBindJSON(&data); err != nil {
+		if err := ctx.ShouldBind(&data); err != nil {
 			panic(err)
 		}
 		mysql := appCtx.GetMySqlDB()

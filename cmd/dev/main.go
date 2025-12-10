@@ -17,6 +17,7 @@ import (
 	itemgin "example.com/m/internal/module/item/transport/gin"
 	itemresourcegin "example.com/m/internal/module/item_resource/transport/gin"
 	itemtypegin "example.com/m/internal/module/item_type/transport/gin"
+	landmarkgin "example.com/m/internal/module/landmarks/transport/gin"
 	resourcegin "example.com/m/internal/module/resource/transport/gin"
 	resourcetypegin "example.com/m/internal/module/resource_type/transport/gin"
 	"github.com/gin-contrib/cors"
@@ -53,6 +54,7 @@ func main() {
 
 	// Setup modules
 	modules := []common.AppModule{
+		landmarkgin.NewLandmarkModule(appCtx),
 		itemresourcegin.NewItemResourceModule(appCtx),
 		resourcegin.NewResourceModule(appCtx),
 		resourcetypegin.NewResourceTypeModule(appCtx),

@@ -1,6 +1,7 @@
 <template>
   <div class="container mt-4">
     <NavMenu />
+
     <div class="d-flex justify-content-between align-items-center mb-3">
       <h2 class="mb-0">Danh sách Items</h2>
       <div class="d-flex gap-2 w-50">
@@ -18,17 +19,20 @@
     </div>
 
     <br />
+
     <div v-if="loading" class="text-center">Đang tải dữ liệu...</div>
 
     <table class="table table-bordered align-middle" v-else>
       <thead class="thead-light">
         <tr>
           <th style="white-space: nowrap; width: 200px;">Name</th>
+          <th style="width: 120px;">Image</th>
           <th style="width: 100px;">Loại Item</th>
           <th style="width: 200px;">Code</th>
           <th style="width: 200px;">Actions</th>
         </tr>
       </thead>
+
       <tbody>
         <tr
           v-for="item in paginatedItems"
@@ -38,23 +42,43 @@
           style="cursor: pointer;"
         >
           <td>{{ item.name }}</td>
+
+          <!-- IMAGE -->
+          <td style="width: 120px;">
+            <img
+              v-if="item.urlImage"
+              :src="item.urlImage"
+              alt="Item Image"
+              style="width: 100px; height: 100px; object-fit: cover; border-radius: 6px;"
+            />
+            <span v-else>Không có ảnh</span>
+          </td>
+
           <td>{{ item.item_Type?.name || 'Không xác định' }}</td>
+
           <td class="text-truncate position-relative" style="width: 200px;">
             <div class="d-flex justify-content-between align-items-center">
               <span class="text-truncate" style="width: 200px;" :title="item.code">
                 {{ item.code }}
               </span>
-              <button class="btn btn-sm btn-outline-secondary" @click.stop="copyToClipboard(item.code)">Copy</button>
+              <button
+                class="btn btn-sm btn-outline-secondary"
+                @click.stop="copyToClipboard(item.code)"
+              >
+                Copy
+              </button>
             </div>
           </td>
+
           <td>
             <button class="btn btn-sm btn-warning btn-custom" @click.stop="updateItem(item.id)">Cập nhật</button>
             <button class="btn btn-sm btn-info btn-custom" @click.stop="edit(item.id)">Chỉnh sửa</button>
             <button class="btn btn-sm btn-success btn-custom" @click.stop="addResource(item.id)">Thêm Resource</button>
           </td>
         </tr>
+
         <tr v-if="paginatedItems.length === 0">
-          <td colspan="4" class="text-center">Không tìm thấy item nào</td>
+          <td colspan="5" class="text-center">Không tìm thấy item nào</td>
         </tr>
       </tbody>
     </table>
@@ -68,6 +92,7 @@
     <!-- Hiển thị code nhân lên số lượng -->
     <div v-if="selectedItem" class="mt-4">
       <h5>Đã chọn: {{ selectedItem.name }}</h5>
+
       <div class="mb-2">
         <label for="number">Số lượng:</label>
         <input
@@ -93,9 +118,8 @@ import NavMenu from '../layout/NavMenu.vue';
 
 export default {
   name: 'ItemList',
-  components: {
-    NavMenu,
-  },
+  components: { NavMenu },
+
   data() {
     return {
       items: [],
@@ -108,6 +132,7 @@ export default {
       selectedNumber: 1,
     };
   },
+
   computed: {
     filteredItems() {
       return this.items.filter(item =>
@@ -127,6 +152,7 @@ export default {
       return Array.from({ length: this.selectedNumber }, () => this.selectedItem.code);
     },
   },
+
   methods: {
     async fetchItems() {
       this.loading = true;
@@ -136,8 +162,18 @@ export default {
           page: this.currentPage,
           search: this.search,
         };
+
         const res = await axios.get('http://localhost:9999/items/', { params });
-        this.items = res.data.result || [];
+
+        // Chỉnh urlImage để FE đọc trực tiếp từ public
+        this.items = (res.data.result || []).map(item => {
+          if (item.urlImage) {
+            const fileName = item.urlImage.split('/').pop();
+            item.urlImage = '/items/' + fileName; // trỏ vào public folder
+          }
+          return item;
+        });
+
         this.totalItems = res.data.pagingData.total || 0;
       } catch (err) {
         console.error('Lỗi khi lấy dữ liệu:', err);
@@ -145,23 +181,28 @@ export default {
         this.loading = false;
       }
     },
+
     copyToClipboard(text) {
       navigator.clipboard.writeText(text).then(() => {
         alert('Đã sao chép!');
       });
     },
+
     copyCodes() {
       const text = this.generatedCodes.join('\n');
       navigator.clipboard.writeText(text).then(() => {
         alert('Đã copy toàn bộ!');
       });
     },
+
     edit(id) {
       this.$router.push(`/items/edit/${id}`);
     },
+
     addResource(itemId) {
       this.$router.push(`/itemresource/create/${itemId}`);
     },
+
     updateItem(id) {
       const item = this.items.find(i => i.id === id);
       if (!item) {
@@ -169,10 +210,7 @@ export default {
         return;
       }
 
-      const updateData = {
-        name: item.name,
-        code: item.code,
-      };
+      const updateData = { name: item.name, code: item.code };
 
       axios
         .put(`http://localhost:9999/items/${id}`, updateData)
@@ -185,32 +223,38 @@ export default {
           alert('Cập nhật thất bại.');
         });
     },
+
     goToCreate() {
       this.$router.push('/items/create');
     },
+
     nextPage() {
       if (this.currentPage < this.totalPages) {
         this.currentPage++;
         this.fetchItems();
       }
     },
+
     prevPage() {
       if (this.currentPage > 1) {
         this.currentPage--;
         this.fetchItems();
       }
     },
+
     selectItem(item) {
       this.selectedItem = item;
       this.selectedNumber = 1;
     },
   },
+
   watch: {
     search() {
       this.currentPage = 1;
       this.fetchItems();
     },
   },
+
   mounted() {
     this.fetchItems();
   },

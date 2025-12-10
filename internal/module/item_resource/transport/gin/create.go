@@ -27,7 +27,7 @@ func create(appCtx component.AppContext) gin.HandlerFunc {
 		biz := itemresourcebiz.NewCreateItemResourceBiz(store, resourceStore, itemstore)
 
 		var data []itemresourcemodel.CreateItemRrsourceRequest
-		if err := ctx.ShouldBindJSON(&data); err != nil {
+		if err := ctx.ShouldBind(&data); err != nil {
 			panic(err)
 		}
 		if err := biz.Create(ctx.Request.Context(), id, data); err != nil {
