@@ -92,7 +92,7 @@ export default {
         this.landmarks = (res.data.result || []).map(lm => {
           if (lm.urlImage) {
             const fileName = lm.urlImage.split('/').pop();
-            lm.urlImage = '/landmarks/' + fileName;
+            lm.urlImage = '/items/' + fileName;
           }
           return lm;
         });
@@ -102,7 +102,7 @@ export default {
         this.loading = false;
       }
     },
-    goToCreate() { this.$router.push('/landmarks/create'); },
+    goToCreate() { this.$router.push('/landmarks/create/'); },
     editLandmark(id) { this.$router.push(`/landmarks/edit/${id}`); },
     goToAddItemsResources(landmarkId) {
       this.$router.push(`/landmarks/${landmarkId}/add-items-resources`);

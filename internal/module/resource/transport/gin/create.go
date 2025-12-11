@@ -18,7 +18,7 @@ func create(appCtx component.AppContext) gin.HandlerFunc {
 			return
 		}
 		file, _ := c.FormFile("file")
-		uploader := common.NewLocalUploader("./frontend/public/resources")
+		uploader := common.NewLocalUploader("./frontend/public/items")
 		mysqlDB := appCtx.GetMySqlDB()
 		Store := resourcestore.NewResourcesStore(mysqlDB)
 		resourceTypeStore := resourcetypestore.NewResourceTypeStore(mysqlDB)

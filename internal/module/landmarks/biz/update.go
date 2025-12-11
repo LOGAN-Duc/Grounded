@@ -61,7 +61,7 @@ func (biz *landmarkUpdateBiz) AddItemsAndResources(ctx context.Context, landmark
 	// --- Thêm Items ---
 	existingItemMap := make(map[int]bool)
 	for _, item := range landmarkIdt.LandmarkItems {
-		existingItemMap[item.ItemId] = true
+		existingItemMap[*item.ItemID] = true
 	}
 
 	for _, itemId := range req.ItemIds {
@@ -70,8 +70,8 @@ func (biz *landmarkUpdateBiz) AddItemsAndResources(ctx context.Context, landmark
 		}
 
 		newItem := landmarkitemmodel.LandMarkItem{
-			LandmarkId: int(landmarkId),
-			ItemId:     itemId,
+			LandmarkID: &landmarkId,
+			ItemID:     &itemId,
 		}
 
 		if err := biz.landmarkItem.CreateLandmarkItem(ctx, newItem); err != nil {
@@ -82,7 +82,7 @@ func (biz *landmarkUpdateBiz) AddItemsAndResources(ctx context.Context, landmark
 	// --- Thêm Resources ---
 	existingResourceMap := make(map[int]bool)
 	for _, item := range landmarkIdt.LandmarkItems {
-		existingResourceMap[item.ResourceId] = true
+		existingResourceMap[*item.ResourceID] = true
 	}
 
 	for _, resId := range req.ResourceIds {
@@ -91,8 +91,8 @@ func (biz *landmarkUpdateBiz) AddItemsAndResources(ctx context.Context, landmark
 		}
 
 		newResource := landmarkitemmodel.LandMarkItem{
-			LandmarkId: int(landmarkId),
-			ResourceId: resId,
+			LandmarkID: &landmarkId,
+			ResourceID: &resId,
 		}
 
 		if err := biz.landmarkItem.CreateLandmarkItem(ctx, newResource); err != nil {

@@ -93,6 +93,7 @@ DROP FOREIGN KEY fk_resource_type;
 
 ALTER TABLE items
 DROP FOREIGN KEY fk_item_type;
+DROP TABLE IF EXISTS landmark_items;
 
 DROP TABLE IF EXISTS landmarks;
 DROP TABLE IF EXISTS item_resources;
