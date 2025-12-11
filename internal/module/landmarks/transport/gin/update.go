@@ -4,9 +4,11 @@ import (
 	"strconv"
 
 	"example.com/m/internal/component"
+	landmarkitemstore "example.com/m/internal/module/landmarkitem/store"
 	landmarkbiz "example.com/m/internal/module/landmarks/biz"
 	landmarkmodel "example.com/m/internal/module/landmarks/model"
 	landmarkstore "example.com/m/internal/module/landmarks/store"
+	resourcestore "example.com/m/internal/module/resource/store"
 	"github.com/gin-gonic/gin"
 )
 
@@ -26,7 +28,9 @@ func update(appCtx component.AppContext) gin.HandlerFunc {
 		}
 		mysqlDB := appCtx.GetMySqlDB()
 		Store := landmarkstore.NewLandmarkStore(mysqlDB)
-		Biz := landmarkbiz.NewLandmarkUpdateBiz(Store)
+		RecountResource := resourcestore.NewResourcesStore(mysqlDB)
+		LandmarkItemStore := landmarkitemstore.NewLandmarkItemStore(mysqlDB)
+		Biz := landmarkbiz.NewLandmarkUpdateBiz(Store, RecountResource, LandmarkItemStore)
 		if err := Biz.UpdateLandmark(c.Request.Context(), uint(id), landmark); err != nil {
 			c.JSON(400, gin.H{"error": err.Error()})
 			return

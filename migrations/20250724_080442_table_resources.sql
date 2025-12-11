@@ -14,7 +14,6 @@ CREATE TABLE resources (
     url_image TEXT DEFAULT NULL,
     code TEXT DEFAULT NULL,
     resource_type_id INT,
-    landmark_id INT,
     status varchar(2) DEFAULT 1  -- Thêm cột status
 );
 
@@ -45,6 +44,13 @@ CREATE TABLE landmarks (
     status varchar(2) DEFAULT 1  -- Thêm cột status
 );
 
+CREATE TABLE landmark_items (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    landmark_id INT,
+    item_id INT,
+    resource_id INT,
+    status varchar(2) DEFAULT 1 -- Thêm cột status
+);
 ALTER TABLE items
 ADD CONSTRAINT fk_item_type FOREIGN KEY (item_type_id) REFERENCES item_type(id);
 
@@ -57,11 +63,24 @@ ADD CONSTRAINT fk_item FOREIGN KEY (item_id) REFERENCES items(id);
 ALTER TABLE item_resources
 ADD CONSTRAINT fk_resource FOREIGN KEY (resource_id) REFERENCES resources(id);
 
-ALTER TABLE resources 
-ADD CONSTRAINT fk_resource_landmark FOREIGN KEY (landmark_id)  REFERENCES landmarks(id);
+ALTER TABLE landmark_items 
+ADD CONSTRAINT fk_landmarks_landmark_item FOREIGN KEY (landmark_id)  REFERENCES landmarks(id);
+
+ALTER TABLE landmark_items 
+ADD CONSTRAINT fk_resource_landmark_item FOREIGN KEY (resource_id)  REFERENCES resources(id);
+
+
+ALTER TABLE landmark_items 
+ADD CONSTRAINT fk_items_landmark_item FOREIGN KEY (item_id)  REFERENCES items(id);
 -- +migrate Down
-ALTER TABLE resources
-DROP FOREIGN KEY fk_resource_landmark;
+ALTER TABLE landmark_items
+DROP FOREIGN KEY fk_items_landmark_item;
+
+ALTER TABLE landmark_items
+DROP FOREIGN KEY fk_resource_landmark_item;
+
+ALTER TABLE landmark_items
+DROP FOREIGN KEY fk_landmarks_landmark_item;
 
 ALTER TABLE item_resources
 DROP FOREIGN KEY fk_item;

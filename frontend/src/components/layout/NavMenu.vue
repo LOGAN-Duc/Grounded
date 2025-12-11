@@ -3,7 +3,7 @@
     <ul>
       <li><router-link to="/">Danh Sách Items</router-link></li>
       <li><router-link to="/resources">Danh Sach Resources</router-link></li>
-      <li><router-link to="/about">Giới Thiệu</router-link></li>
+      <li><router-link to="/landmarks">Địa Danh</router-link></li>
     </ul>
   </nav>
 </template>
