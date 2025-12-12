@@ -50,23 +50,41 @@ func (biz *landmarkUpdateBiz) UpdateLandmark(ctx context.Context, landmarkId uin
 	}
 	return biz.landmarkStore.UpdateLandmark(ctx, landmarkId, datas)
 }
+func (biz *landmarkUpdateBiz) AddItemsAndResources(
+	ctx context.Context,
+	landmarkId int,
+	req landmarkitemmodel.LandmarkAddRequest,
+) error {
 
-func (biz *landmarkUpdateBiz) AddItemsAndResources(ctx context.Context, landmarkId int, req landmarkitemmodel.LandmarkAddRequest) error {
-	// Lấy landmark hiện tại kèm items & resources
-	landmarkIdt, err := biz.landmarkStore.Find(ctx, int64(landmarkId), []string{"LandmarkItems"})
+	// 1. Lấy landmark kèm danh sách items/resources
+	landmark, err := biz.landmarkStore.Find(ctx, int64(landmarkId), []string{"LandmarkItems"})
 	if err != nil {
 		return err
 	}
 
-	// --- Thêm Items ---
+	// ================================
+	// 2. Build map items hiện có
+	// ================================
 	existingItemMap := make(map[int]bool)
-	for _, item := range landmarkIdt.LandmarkItems {
-		existingItemMap[*item.ItemID] = true
+	existingResourceMap := make(map[int]bool)
+
+	for _, lmItem := range landmark.LandmarkItems {
+
+		if lmItem.ItemID != nil {
+			existingItemMap[*lmItem.ItemID] = true
+		}
+
+		if lmItem.ResourceID != nil {
+			existingResourceMap[*lmItem.ResourceID] = true
+		}
 	}
 
+	// ================================
+	// 3. Insert Items mới
+	// ================================
 	for _, itemId := range req.ItemIds {
 		if existingItemMap[itemId] {
-			continue // bỏ qua nếu đã tồn tại
+			continue
 		}
 
 		newItem := landmarkitemmodel.LandMarkItem{
@@ -79,15 +97,12 @@ func (biz *landmarkUpdateBiz) AddItemsAndResources(ctx context.Context, landmark
 		}
 	}
 
-	// --- Thêm Resources ---
-	existingResourceMap := make(map[int]bool)
-	for _, item := range landmarkIdt.LandmarkItems {
-		existingResourceMap[*item.ResourceID] = true
-	}
-
+	// ================================
+	// 4. Insert Resources mới
+	// ================================
 	for _, resId := range req.ResourceIds {
 		if existingResourceMap[resId] {
-			continue // bỏ qua nếu đã tồn tại
+			continue
 		}
 
 		newResource := landmarkitemmodel.LandMarkItem{

@@ -7,10 +7,11 @@ import (
 
 type Landmark struct {
 	common.MySqlModel
-	Name          string                            `json:"name" gorm:"column:name;not null"`
-	Description   string                            `json:"description" gorm:"column:description"`
-	UrlImage      string                            `json:"urlImage" gorm:"column:url_image"`
-	LandmarkItems []*landmarkitemmodel.LandMarkItem `json:"landmark_items" gorm:"-"`
+	Name        string `json:"name" gorm:"column:name;not null"`
+	Description string `json:"description" gorm:"column:description"`
+	UrlImage    string `json:"urlImage" gorm:"column:url_image"`
+
+	LandmarkItems []*landmarkitemmodel.LandMarkItem `json:"landmark_items" gorm:"foreignKey:LandmarkID"`
 }
 
 func (Landmark) TableName() string {

@@ -1,11 +1,9 @@
 package common
 
 import (
-	"fmt"
 	"io"
 	"mime/multipart"
 	"os"
-	"time"
 )
 
 type FileUploader interface {
@@ -20,7 +18,7 @@ func NewLocalUploader(folder string) *LocalUploader {
 	return &LocalUploader{Folder: folder}
 }
 func (u *LocalUploader) Upload(file *multipart.FileHeader) (string, error) {
-	fileName := fmt.Sprintf("%d_%s", time.Now().Unix(), file.Filename)
+	fileName := file.Filename
 	savePath := u.Folder + "/" + fileName
 
 	// Tạo folder nếu chưa có

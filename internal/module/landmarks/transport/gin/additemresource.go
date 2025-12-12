@@ -16,12 +16,14 @@ func addItemsAndResources(appCtx component.AppContext) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req landmarkitemmodel.LandmarkAddRequest
 		if err := c.ShouldBind(&req); err != nil {
-			panic(err)
+			c.JSON(400, gin.H{"error": err.Error()})
+			return
 		}
-		idStr := c.Param("id")
-		id, err := strconv.Atoi(idStr)
+
+		id, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
-			panic(err)
+			c.JSON(400, gin.H{"error": "invalid id"})
+			return
 		}
 
 		biz := landmarkbiz.NewLandmarkUpdateBiz(
@@ -30,8 +32,13 @@ func addItemsAndResources(appCtx component.AppContext) gin.HandlerFunc {
 			landmarkitemstore.NewLandmarkItemStore(appCtx.GetMySqlDB()),
 		)
 
-		if err := biz.AddItemsAndResources(c.Request.Context(), id, req); err != nil {
-			panic(err)
+		if err := biz.AddItemsAndResources(c, id, req); err != nil {
+			c.JSON(500, gin.H{"error": err.Error()})
+			return
 		}
+
+		c.JSON(200, gin.H{
+			"message": "Added items and resources successfully",
+		})
 	}
 }

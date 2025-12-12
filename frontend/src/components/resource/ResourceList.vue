@@ -45,7 +45,7 @@
               v-if="resource.urlImage"
               :src="resource.urlImage"
               alt="Resource Image"
-              style="width: 100px; height: 100px; object-fit: cover; border-radius: 6px;"
+              style="object-fit: cover; border-radius: 6px;"
             />
             <span v-else>Không có ảnh</span>
           </td>

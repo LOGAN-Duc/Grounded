@@ -21,7 +21,12 @@
       </thead>
       <tbody>
         <tr v-for="lm in paginatedLandmarks" :key="lm.id">
-          <td>{{ lm.name }}</td>
+          <!-- Tên Landmark bấm vào sẽ xem chi tiết -->
+          <td>
+            <span class="link-primary pointer" @click="viewLandmark(lm.id)">
+              {{ lm.name }}
+            </span>
+          </td>
           <td>{{ lm.description || '-' }}</td>
           <td>
             <img v-if="lm.urlImage" :src="lm.urlImage" alt="" style="width:80px;height:80px;object-fit:cover;">
@@ -88,7 +93,6 @@ export default {
       this.loading = true;
       try {
         const res = await axios.get('http://localhost:9999/landmarks/');
-        console.log('Landmarks from backend:', res.data.result);
         this.landmarks = (res.data.result || []).map(lm => {
           if (lm.urlImage) {
             const fileName = lm.urlImage.split('/').pop();
@@ -106,6 +110,9 @@ export default {
     editLandmark(id) { this.$router.push(`/landmarks/edit/${id}`); },
     goToAddItemsResources(landmarkId) {
       this.$router.push(`/landmarks/${landmarkId}/add-items-resources`);
+    },
+    viewLandmark(id) {
+      this.$router.push(`/landmarks/view/${id}`);
     },
     changePage(page) {
       if (page < 1 || page > this.totalPages) return;
@@ -129,5 +136,12 @@ export default {
 }
 .list-group-item:hover {
   background-color: #f1f1f1;
+}
+.pointer {
+  cursor: pointer;
+}
+.link-primary {
+  color: #0d6efd;
+  text-decoration: underline;
 }
 </style>

@@ -11,6 +11,7 @@ import CreateItemResource from '../components/ItemResource/Create.vue';
 import View from '@/components/landMark/view.vue';
 import CreateLandmark from '@/components/landMark/create.vue';
 import CreateLandMarkItem from '@/components/landMarkItem/createLandMarkItem.vue';
+import LandmarkView from '@/components/landMark/LandmarkView.vue'; 
 
 const routes = [
   { path: '/', component: ItemList },
@@ -23,6 +24,7 @@ const routes = [
   { path: '/landmarks', component: View },
   { path: '/landmarks/create', component: CreateLandmark },
   { path: '/landmarks/:id/add-items-resources', component: CreateLandMarkItem, props: true },
+   { path: '/landmarks/view/:id', component: LandmarkView, props: true },
 ];
 
 const router = createRouter({

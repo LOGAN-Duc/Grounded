@@ -118,7 +118,7 @@ export default {
       axios
         .get(`http://localhost:9999/resources/no_item/${this.item.id}`)
         .then(res => {
-          // Chỉnh urlImage để FE đọc trực tiếp từ public
+          // Chỉnh urlImage để FE đọc trực tiếp từ public 
           this.resources = (res.data.result || res.data).map(resource => {
             if (resource.urlImage) {
               const fileName = resource.urlImage.split('/').pop();
