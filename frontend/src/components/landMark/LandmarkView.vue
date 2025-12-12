@@ -14,7 +14,7 @@
 
     <h4>Items</h4>
     <table class="table table-bordered align-middle" v-if="items.length">
-      <thead>
+      <thead> 
         <tr>
           <th>Ảnh</th>
           <th>Tên Item</th>
