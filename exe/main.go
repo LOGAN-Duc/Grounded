@@ -1,34 +1,34 @@
 package main
 
 import (
-	"fmt"
 	"sync"
 )
 
-var (
-	once sync.Once
-	i    int
-)
+var num int = 0
 
-func CreateInstance() {
-	once.Do(func() {
-		fmt.Println("Running initialization...")
-		i = 123 // chỉ chạy 1 lần
-	})
-}
-
-func main() {
-	wg := sync.WaitGroup{}
-
-	// gọi CreateInstance từ nhiều goroutine
-	for n := 0; n < 10; n++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			CreateInstance()
-		}()
+func add(lc *sync.Mutex, wg *sync.WaitGroup) {
+	defer wg.Done()
+	for i := 0; i < 100000; i = i + 1 {
+		lc.Lock()
+		num = num + 1
+		lc.Unlock()
 	}
-
+}
+func minus(lc *sync.Mutex, wg *sync.WaitGroup) {
+	defer wg.Done()
+	for i := 0; i < 100000; i = i + 1 {
+		lc.Lock()
+		num = num - 1
+		lc.Unlock()
+	}
+}
+func main() {
+	var mutex *sync.Mutex = new(sync.Mutex)
+	var wg *sync.WaitGroup = new(sync.WaitGroup)
+	wg.Add(2)
+	go add(mutex, wg)
+	go minus(mutex, wg)
 	wg.Wait()
-	fmt.Println("Final value of i =", i)
+
+	println(num) // 0
 }
