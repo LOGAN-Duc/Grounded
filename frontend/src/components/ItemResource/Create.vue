@@ -122,7 +122,7 @@ export default {
           this.resources = (res.data.result || res.data).map(resource => {
             if (resource.urlImage) {
               const fileName = resource.urlImage.split('/').pop();
-              resource.urlImage = '/resources/' + fileName; // trỏ vào public folder
+              resource.urlImage = '/items/' + fileName; // trỏ vào public folder
             }
             return resource;
           });

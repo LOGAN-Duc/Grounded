@@ -15,5 +15,6 @@ type UpdateItemRequest struct {
 }
 
 type ListItemRequest struct {
-	Search string `json:"search" form:"search"`
+	Search   string `json:"search" form:"search"`
+	TypeItem string `json:"type_Item" form:"type_Item"`
 }

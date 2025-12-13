@@ -2,63 +2,70 @@
   <div class="container mt-4">
     <NavMenu />
 
+    <!-- HEADER -->
     <div class="d-flex justify-content-between align-items-center mb-3">
       <h2 class="mb-0">Danh sách Items</h2>
-      <div class="d-flex gap-2 w-50">
+
+      <div class="d-flex gap-2 w-50 align-items-center">
         <input
           type="text"
           class="form-control"
           placeholder="Tìm theo tên..."
           v-model="search"
         />
+
+        <select class="form-select" v-model="selectedType">
+          <option value="">-- Tất cả loại --</option>
+          <option v-for="type in itemTypes" :key="type.id" :value="type.name">
+            {{ type.name }}
+          </option>
+        </select>
       </div>
     </div>
 
-    <div class="mt-3">
+    <div class="mb-3">
       <button class="btn btn-primary" @click="goToCreate">+ Tạo Item</button>
     </div>
 
-    <br />
+    <div v-if="loading" class="text-center py-4">Đang tải dữ liệu...</div>
 
-    <div v-if="loading" class="text-center">Đang tải dữ liệu...</div>
-
-    <table class="table table-bordered align-middle" v-else>
-      <thead class="thead-light">
+    <!-- TABLE -->
+    <table class="table table-bordered table-hover align-middle" v-else>
+      <thead class="table-light">
         <tr>
-          <th style="white-space: nowrap; width: 200px;">Name</th>
+          <th style="width: 180px;">Name</th>
           <th style="width: 120px;">Image</th>
-          <th style="width: 100px;">Loại Item</th>
-          <th style="width: 200px;">Code</th>
-          <th style="width: 200px;">Actions</th>
+          <th style="width: 120px;">Loại Item</th>
+          <th style="width: 160px;">Code</th>
+          <th style="width: 220px;">Actions</th>
         </tr>
       </thead>
 
       <tbody>
         <tr
-          v-for="item in paginatedItems"
+          v-for="item in items"
           :key="item.id"
           @click="selectItem(item)"
-          :class="{ 'table-active': selectedItem && selectedItem.id === item.id }"
+          :class="{ 'table-active': selectedItem?.id === item.id }"
           style="cursor: pointer;"
         >
           <td>{{ item.name }}</td>
 
-          <!-- IMAGE -->
-          <td style="width: 120px;">
+          <td>
             <img
               v-if="item.urlImage"
               :src="item.urlImage"
-              alt="Item Image"
-              style="width: 100px; height: 100px; object-fit: cover; border-radius: 6px;"
+              class="item-image"
             />
-            <span v-else>Không có ảnh</span>
+            <span v-else class="text-muted">Không có ảnh</span>
           </td>
 
-          <td>{{ item.item_Type?.name || 'Không xác định' }}</td>
+          <td>{{ item.item_Type?.name || 'N/A' }}</td>
 
-          <td class="text-truncate position-relative" style="width: 200px;">
-            <div class="d-flex justify-content-between align-items-center">
-              <span class="text-truncate" style="width: 200px;" :title="item.code">
+          <!-- CODE -->
+          <td>
+            <div class="code-cell">
+              <span class="code-text" :title="item.code">
                 {{ item.code }}
               </span>
               <button
@@ -70,51 +77,87 @@
             </div>
           </td>
 
+          <!-- ACTIONS -->
           <td>
-            <button class="btn btn-sm btn-warning btn-custom" @click.stop="updateItem(item.id)">Cập nhật</button>
-            <button class="btn btn-sm btn-info btn-custom" @click.stop="edit(item.id)">Chỉnh sửa</button>
-            <button class="btn btn-sm btn-success btn-custom" @click.stop="addResource(item.id)">Thêm Resource</button>
+            <div class="d-flex gap-1 flex-wrap">
+              <button
+                class="btn btn-sm btn-warning"
+                @click.stop="updateItem(item.id)"
+              >
+                Cập nhật
+              </button>
+              <button
+                class="btn btn-sm btn-info"
+                @click.stop="edit(item.id)"
+              >
+                Sửa
+              </button>
+              <button
+                class="btn btn-sm btn-success"
+                @click.stop="addResource(item.id)"
+              >
+                Resource
+              </button>
+            </div>
           </td>
         </tr>
 
-        <tr v-if="paginatedItems.length === 0">
-          <td colspan="5" class="text-center">Không tìm thấy item nào</td>
+        <tr v-if="items.length === 0">
+          <td colspan="5" class="text-center text-muted">
+            Không có dữ liệu
+          </td>
         </tr>
       </tbody>
     </table>
 
+    <!-- PAGINATION -->
     <div class="d-flex justify-content-between align-items-center mt-3">
-      <button class="btn btn-secondary" @click="prevPage" :disabled="currentPage === 1">Trước</button>
-      <span>Trang {{ currentPage }} / {{ totalPages }}</span>
-      <button class="btn btn-secondary" @click="nextPage" :disabled="currentPage === totalPages">Sau</button>
+      <button
+        class="btn btn-secondary"
+        @click="prevPage"
+        :disabled="currentPage === 1"
+      >
+        Trước
+      </button>
+
+      <span>Trang {{ currentPage }}</span>
+
+      <button class="btn btn-secondary" @click="nextPage">
+        Sau
+      </button>
     </div>
 
-    <!-- Hiển thị code nhân lên số lượng -->
+    <!-- GENERATE CODE -->
     <div v-if="selectedItem" class="mt-4">
       <h5>Đã chọn: {{ selectedItem.name }}</h5>
 
-      <div class="mb-2">
-        <label for="number">Số lượng:</label>
+      <div class="d-flex align-items-center gap-2 mb-2">
+        <label class="mb-0">Số lượng:</label>
         <input
           type="number"
           min="1"
           v-model.number="selectedNumber"
-          class="form-control d-inline-block w-auto ms-2"
+          class="form-control w-auto"
         />
       </div>
 
-      <div v-if="generatedCodes.length > 0">
-        <label>Danh sách mã ({{ generatedCodes.length }}):</label>
-        <textarea class="form-control" rows="5" readonly :value="generatedCodes.join('\n')"></textarea>
-        <button class="btn btn-outline-secondary mt-2" @click="copyCodes">Copy tất cả</button>
-      </div>
+      <textarea
+        class="form-control"
+        rows="5"
+        readonly
+        :value="generatedCodes.join('\n')"
+      ></textarea>
+
+      <button class="btn btn-outline-secondary mt-2" @click="copyCodes">
+        Copy tất cả
+      </button>
     </div>
   </div>
 </template>
 
 <script>
-import axios from 'axios';
-import NavMenu from '../layout/NavMenu.vue';
+import axios from 'axios'
+import NavMenu from '../layout/NavMenu.vue'
 
 export default {
   name: 'ItemList',
@@ -123,6 +166,8 @@ export default {
   data() {
     return {
       items: [],
+      itemTypes: [],
+      selectedType: '',
       search: '',
       loading: false,
       currentPage: 1,
@@ -130,148 +175,139 @@ export default {
       totalItems: 0,
       selectedItem: null,
       selectedNumber: 1,
-    };
+    }
   },
 
   computed: {
-    filteredItems() {
-      return this.items.filter(item =>
-        item.name.toLowerCase().includes(this.search.toLowerCase())
-      );
-    },
-    paginatedItems() {
-      const start = 0;
-      const end = start + this.itemsPerPage;
-      return this.filteredItems.slice(start, end);
-    },
-    totalPages() {
-      return Math.ceil(this.totalItems / this.itemsPerPage);
-    },
     generatedCodes() {
-      if (!this.selectedItem || this.selectedNumber < 1) return [];
-      return Array.from({ length: this.selectedNumber }, () => this.selectedItem.code);
+      if (!this.selectedItem) return []
+      return Array.from(
+        { length: this.selectedNumber },
+        () => this.selectedItem.code
+      )
     },
   },
 
   methods: {
+    async fetchItemTypes() {
+      const res = await axios.get('/items-type')
+      this.itemTypes = res.data.result || []
+    },
+
     async fetchItems() {
-      this.loading = true;
+      this.loading = true
       try {
-        const params = {
-          limit: this.itemsPerPage,
-          page: this.currentPage,
-          search: this.search,
-        };
+        const res = await axios.get('/items', {
+          params: {
+            page: this.currentPage,
+            limit: this.itemsPerPage,
+            search: this.search,
+            type_Item: this.selectedType,
+          },
+        })
 
-        const res = await axios.get('http://localhost:9999/items/', { params });
-
-        // Chỉnh urlImage để FE đọc trực tiếp từ public
-        this.items = (res.data.result || []).map(item => {
-          if (item.urlImage) {
-            const fileName = item.urlImage.split('/').pop();
-            item.urlImage = '/items/' + fileName; // trỏ vào public folder
+        this.items = (res.data.result || []).map(i => {
+          if (i.urlImage) {
+            i.urlImage = '/items/' + i.urlImage.split('/').pop()
           }
-          return item;
-        });
+          return i
+        })
 
-        this.totalItems = res.data.pagingData.total || 0;
-      } catch (err) {
-        console.error('Lỗi khi lấy dữ liệu:', err);
+        this.totalItems = res.data.pagingData?.total || 0
       } finally {
-        this.loading = false;
+        this.loading = false
       }
     },
 
     copyToClipboard(text) {
-      navigator.clipboard.writeText(text).then(() => {
-        alert('Đã sao chép!');
-      });
+      navigator.clipboard.writeText(text)
+      alert('Đã sao chép')
     },
 
     copyCodes() {
-      const text = this.generatedCodes.join('\n');
-      navigator.clipboard.writeText(text).then(() => {
-        alert('Đã copy toàn bộ!');
-      });
+      navigator.clipboard.writeText(this.generatedCodes.join('\n'))
+      alert('Đã copy toàn bộ')
     },
 
     edit(id) {
-      this.$router.push(`/items/edit/${id}`);
+      this.$router.push(`/items/edit/${id}`)
     },
 
-    addResource(itemId) {
-      this.$router.push(`/itemresource/create/${itemId}`);
+    addResource(id) {
+      this.$router.push(`/itemresource/create/${id}`)
     },
 
     updateItem(id) {
-      const item = this.items.find(i => i.id === id);
-      if (!item) {
-        alert('Không tìm thấy item để cập nhật.');
-        return;
-      }
-
-      const updateData = { name: item.name, code: item.code };
-
-      axios
-        .put(`http://localhost:9999/items/${id}`, updateData)
-        .then(() => {
-          alert('Cập nhật thành công!');
-          this.fetchItems();
-        })
-        .catch(err => {
-          console.error('Lỗi khi cập nhật:', err.response?.data || err.message);
-          alert('Cập nhật thất bại.');
-        });
+      const item = this.items.find(i => i.id === id)
+      axios.put(`/items/${id}`, {
+        name: item.name,
+        code: item.code,
+      })
     },
 
     goToCreate() {
-      this.$router.push('/items/create');
+      this.$router.push('/items/create')
     },
 
     nextPage() {
-      if (this.currentPage < this.totalPages) {
-        this.currentPage++;
-        this.fetchItems();
-      }
+      this.currentPage++
+      this.fetchItems()
     },
 
     prevPage() {
       if (this.currentPage > 1) {
-        this.currentPage--;
-        this.fetchItems();
+        this.currentPage--
+        this.fetchItems()
       }
     },
 
     selectItem(item) {
-      this.selectedItem = item;
-      this.selectedNumber = 1;
+      this.selectedItem = item
+      this.selectedNumber = 1
     },
   },
 
   watch: {
     search() {
-      this.currentPage = 1;
-      this.fetchItems();
+      this.currentPage = 1
+      this.fetchItems()
+    },
+    selectedType() {
+      this.currentPage = 1
+      this.fetchItems()
     },
   },
 
   mounted() {
-    this.fetchItems();
+    this.fetchItemTypes()
+    this.fetchItems()
   },
-};
+}
 </script>
 
 <style scoped>
+.item-image {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.code-cell {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.code-text {
+  max-width: 110px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .table td {
   vertical-align: middle;
-}
-
-.btn-custom {
-  transition: background-color 0.3s, color 0.3s;
-}
-
-.btn-custom:hover {
-  filter: brightness(90%);
 }
 
 .table-active {
