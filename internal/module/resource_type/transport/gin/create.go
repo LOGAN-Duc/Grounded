@@ -11,7 +11,7 @@ import (
 func create(appCtx component.AppContext) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var resourceType resourcetypemodel.CreateResourceTypeRequest
-		if err := c.ShouldBindJSON(&resourceType); err != nil {
+		if err := c.ShouldBind(&resourceType); err != nil {
 			c.JSON(400, gin.H{"error": "Invalid request body"})
 			return
 		}

@@ -1,6 +1,7 @@
 package resourcetransport
 
 import (
+	"example.com/m/internal/common"
 	"example.com/m/internal/component"
 	resourcebiz "example.com/m/internal/module/resource/biz"
 	resourcemodel "example.com/m/internal/module/resource/model"
@@ -12,15 +13,17 @@ import (
 func create(appCtx component.AppContext) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var resource resourcemodel.CreateResourcesRequest
-		if err := c.ShouldBindJSON(&resource); err != nil {
+		if err := c.ShouldBind(&resource); err != nil {
 			c.JSON(400, gin.H{"error": "Invalid request body"})
 			return
 		}
+		file, _ := c.FormFile("file")
+		uploader := common.NewLocalUploader("./frontend/public/items")
 		mysqlDB := appCtx.GetMySqlDB()
 		Store := resourcestore.NewResourcesStore(mysqlDB)
 		resourceTypeStore := resourcetypestore.NewResourceTypeStore(mysqlDB)
-		Biz := resourcebiz.NewCreateResourcesBiz(Store, resourceTypeStore)
-		if err := Biz.Create(c.Request.Context(), &resource); err != nil {
+		Biz := resourcebiz.NewCreateResourcesBiz(Store, resourceTypeStore, uploader)
+		if err := Biz.Create(c.Request.Context(), &resource, file); err != nil {
 			c.JSON(400, gin.H{"error": err.Error()})
 			return
 		}

@@ -22,7 +22,7 @@ func update(appCtx component.AppContext) gin.HandlerFunc {
 		store := itemresourcestore.NewItemResourceStore(mysql)
 		biz := itemresourcebiz.NewUpdateItemResourceBiz(store)
 		var data []itemresourcemodel.UpdateItemRrsourceRequest
-		if err := ctx.ShouldBindJSON(&data); err != nil {
+		if err := ctx.ShouldBind(&data); err != nil {
 			panic(err)
 		}
 		if err := biz.Update(ctx.Request.Context(), id, data); err != nil {

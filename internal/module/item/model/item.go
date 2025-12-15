@@ -11,6 +11,7 @@ type Item struct {
 	Code       string                  `json:"code,omitempty" gorm:"column:code"`
 	ItemTypeId int                     `json:"-" gorm:"column:item_type_id"`
 	ItemType   *itemtypemodel.ItemType `json:"item_Type"`
+	UrlImage   string                  `json:"urlImage" gorm:"column:url_image"`
 }
 
 func (Item) TableName() string {

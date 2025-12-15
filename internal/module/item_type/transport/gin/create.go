@@ -11,7 +11,7 @@ import (
 func create(appCtx component.AppContext) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var itemType itemtypemodel.CreateItemTypeRequest
-		if err := c.ShouldBindJSON(&itemType); err != nil {
+		if err := c.ShouldBind(&itemType); err != nil {
 			c.JSON(400, gin.H{"error": "Invalid request body"})
 			return
 		}
