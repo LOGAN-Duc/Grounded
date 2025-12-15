@@ -106,7 +106,7 @@ export default {
           this.itemresources = (res.data.result || res.data).map(ir => {
             if (ir.resource.urlImage) {
               const fileName = ir.resource.urlImage.split('/').pop();
-              ir.resource.urlImage = '/resources/' + fileName; // trỏ vào public folder
+              ir.resource.urlImage = '/items/' + fileName; // trỏ vào public folder
             }
             return ir;
           });
